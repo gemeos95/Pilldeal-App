@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name"></string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Patrícia Bandarrinha</string>
+    <string name="nav_header_subtitle"></string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_logout">Logout</string>
+    <string name="action_reconect">Reconect</string>
+
+
+
+    <string name="menu_home">Home</string>
+    <string name="menu_gallery">Settings</string>
+    <string name="menu_slideshow">Medication Info</string>
+    <string name="menu_tools">Tracking</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_send">Send</string>
+</resources>

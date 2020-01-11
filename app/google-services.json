@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "19625147287",
+    "firebase_url": "https://pilldeal-20377.firebaseio.com",
+    "project_id": "pilldeal-20377",
+    "storage_bucket": "pilldeal-20377.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:19625147287:android:fdea9fb1da9cc2d0c662d2",
+        "android_client_info": {
+          "package_name": "com.example.pilldeal5"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "19625147287-hgf7lsj4gml09tlfktam029o5lub6jrv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA43Kak52RtVV1sf9FdiqFkSa3N2Dqn5uA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "19625147287-hgf7lsj4gml09tlfktam029o5lub6jrv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
