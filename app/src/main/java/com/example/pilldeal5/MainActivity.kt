@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import com.example.pilldeal5.ui.settings.SettingsFragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -24,9 +25,7 @@ class MainActivity : AppCompatActivity() {
     private var mAppBarConfiguration: AppBarConfiguration? = null
     private var mAuth: FirebaseAuth? = null
     private var mGoogleSignInClient : GoogleSignInClient? = null
-    // Initialize Firebase Auth
 
-    // Initialize Firebase Auth
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,8 +34,6 @@ class MainActivity : AppCompatActivity() {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance()
         // Initialize Firebase Auth
-
-
 
         //Google Authentication------------------------------------------------------------------------------------------------------
         // Google sign in options client!!!!!!!!!!!
@@ -57,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow,
+                R.id.nav_home, R.id.nav_settings, R.id.nav_medinfo,
                 R.id.nav_tools, R.id.nav_share, R.id.nav_send)
                 .setDrawerLayout(drawer)
                 .build()
@@ -66,14 +63,18 @@ class MainActivity : AppCompatActivity() {
         NavigationUI.setupWithNavController(navigationView, navController)
 
 
+
     }
 
+    //INFLATE THE RIGHT HAND SIDE MENU
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
         return true
     }
 
+
+    //RIGHT HAND SIDE MENU CLICK ACTIONS
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item?.itemId==R.id.action_logout){
 

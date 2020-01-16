@@ -11,9 +11,17 @@
 
 
     <string name="menu_home">Home</string>
-    <string name="menu_gallery">Settings</string>
-    <string name="menu_slideshow">Medication Info</string>
-    <string name="menu_tools">Tracking</string>
+
+    <string name="menu_settings">Settings</string>
+        <string name="time_button">set time</string>
+
+    <string name="menu_medinfo">Medication Info</string>
+
+    <string name="menu_tracking">Tracking</string>
+
     <string name="menu_share">Share</string>
+
     <string name="menu_send">Send</string>
+
+
 </resources>

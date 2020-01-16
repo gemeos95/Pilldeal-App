@@ -22,7 +22,7 @@ public class MedInfoFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         medInfoViewModel =
                 ViewModelProviders.of(this).get(MedInfoViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
+        View root = inflater.inflate(R.layout.fragment_medinfo, container, false);
         final TextView textView = root.findViewById(R.id.text_slideshow);
         medInfoViewModel.getText().observe(this, new Observer<String>() {
             @Override

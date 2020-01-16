@@ -22,7 +22,7 @@ public class TrackingFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         trackingViewModel =
                 ViewModelProviders.of(this).get(TrackingViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_tools, container, false);
+        View root = inflater.inflate(R.layout.fragment_tracking, container, false);
         final TextView textView = root.findViewById(R.id.text_tools);
         trackingViewModel.getText().observe(this, new Observer<String>() {
             @Override
