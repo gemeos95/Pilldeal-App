@@ -43,6 +43,15 @@ class Login : AppCompatActivity() {
     private var signInButton : SignInButton? =null
     private var progressBar : ProgressBar? =null
 
+    public override fun onStart() {
+        super.onStart()
+        // Check if user is signed in (non-null) and update UI accordingly.
+
+        if (mAuth!!.currentUser != null) {
+            val user = mAuth!!.currentUser
+            updateUI(user)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,20 +87,15 @@ class Login : AppCompatActivity() {
         })
 
 
-        if (mAuth!!.currentUser != null) {
-            val user = mAuth!!.currentUser
-            updateUI(user)
-        }
 
-    }
-
-    fun  googleSignin(){
 
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.i("onActivityResult","Entrou")
+
+
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == 101) { //if intent showed
@@ -110,6 +114,7 @@ class Login : AppCompatActivity() {
 
     private fun firebaseAuthWithGoogle(acct: GoogleSignInAccount) {
         Log.i("USER","firebaseAuthwithgoogle" + acct.idToken)
+
         val credential = GoogleAuthProvider.getCredential(acct.idToken, null)
         mAuth?.signInWithCredential(credential)
                 ?.addOnCompleteListener(this) { task ->
@@ -139,7 +144,6 @@ class Login : AppCompatActivity() {
             val email =user.email
             val photo = user.photoUrl.toString()
             Log.i("DataUser",name + email + photo)
-            user.uid
 
             // Write a message to the database
             val database = FirebaseDatabase.getInstance().getReference()
