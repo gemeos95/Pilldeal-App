@@ -1,4 +1,4 @@
-package com.example.pilldeal5.ui.tools;
+package com.example.pilldeal5.ui.medinfo;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,17 +14,17 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.example.pilldeal5.R;
 
-public class ToolsFragment extends Fragment {
+public class MedInfoFragment extends Fragment {
 
-    private ToolsViewModel toolsViewModel;
+    private MedInfoViewModel medInfoViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        toolsViewModel =
-                ViewModelProviders.of(this).get(ToolsViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_tools, container, false);
-        final TextView textView = root.findViewById(R.id.text_tools);
-        toolsViewModel.getText().observe(this, new Observer<String>() {
+        medInfoViewModel =
+                ViewModelProviders.of(this).get(MedInfoViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
+        final TextView textView = root.findViewById(R.id.text_slideshow);
+        medInfoViewModel.getText().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

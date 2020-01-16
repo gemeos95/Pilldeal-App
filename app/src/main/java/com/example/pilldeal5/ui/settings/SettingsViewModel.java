@@ -1,14 +1,14 @@
-package com.example.pilldeal5.ui.gallery;
+package com.example.pilldeal5.ui.settings;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class GalleryViewModel extends ViewModel {
+public class SettingsViewModel extends ViewModel {
     // SETTINGS  SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS SETTINGS
     private MutableLiveData<String> mText;
 
-    public GalleryViewModel() {
+    public SettingsViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("In Development");
     }

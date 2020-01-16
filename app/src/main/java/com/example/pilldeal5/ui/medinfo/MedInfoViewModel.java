@@ -1,14 +1,15 @@
-package com.example.pilldeal5.ui.tools;
+package com.example.pilldeal5.ui.medinfo;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class ToolsViewModel extends ViewModel {
-//  TRACKING TRACKING TRACKING TRACKING TRACKING TRACKING TRACKING TRACKING TRACKING TRACKING TRACKING
+public class MedInfoViewModel extends ViewModel {
+    // MED INFO  MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO MED INFO
+
     private MutableLiveData<String> mText;
 
-    public ToolsViewModel() {
+    public MedInfoViewModel() {
         mText = new MutableLiveData<>();
         mText.setValue("In Development");
     }
