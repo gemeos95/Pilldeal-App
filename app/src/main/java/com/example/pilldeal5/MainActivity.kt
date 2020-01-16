@@ -88,6 +88,8 @@ class MainActivity : AppCompatActivity() {
         }else if (item?.itemId==R.id.action_reconect){
             //reconect the user
             //finish()
+            val intent = Intent (this, reconnect::class.java)
+            startActivity(intent)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -111,5 +113,6 @@ class MainActivity : AppCompatActivity() {
         val navController = Navigation.findNavController(this, R.id.nav_host_fragment)
         return NavigationUI.navigateUp(navController, mAppBarConfiguration!!) || super.onSupportNavigateUp()
     }
+
 
 }
