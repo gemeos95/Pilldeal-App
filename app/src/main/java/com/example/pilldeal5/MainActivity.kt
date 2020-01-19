@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
-import com.example.pilldeal5.ui.settings.SettingsFragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -25,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private var mAppBarConfiguration: AppBarConfiguration? = null
     private var mAuth: FirebaseAuth? = null
     private var mGoogleSignInClient : GoogleSignInClient? = null
+    companion object var user = null;
 
 
 
@@ -44,11 +44,14 @@ class MainActivity : AppCompatActivity() {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this,gso)
 
+        //user = intent.getStringExtra("user") as Nothing? //get user uid from login activity
+
+
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-
+        //creating drawer layout
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         // Passing each menu ID as a set of Ids because each
@@ -84,7 +87,7 @@ class MainActivity : AppCompatActivity() {
 
             //Signout the user
             //move to login
-            val intent = Intent (this, Login::class.java)
+            val intent = Intent (this, LoginActivity::class.java)
             startActivity(intent)
         }else if (item?.itemId==R.id.action_reconect){
             //reconect the user
