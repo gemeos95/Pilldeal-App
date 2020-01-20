@@ -97,6 +97,7 @@ class Login : AppCompatActivity() {
 
 
 
+
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == 101) { //if intent showed
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
