@@ -159,9 +159,6 @@ class Login : AppCompatActivity() {
             Log.i("NoUser","no user data")
         }
 
-        //Update database
-
-
     }
 
 

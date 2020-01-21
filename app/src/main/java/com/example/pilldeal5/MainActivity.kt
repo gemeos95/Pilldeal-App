@@ -1,6 +1,7 @@
 package com.example.pilldeal5
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.navigation.Navigation
@@ -12,12 +13,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
+import androidx.annotation.RequiresApi
 import com.example.pilldeal5.ui.settings.SettingsFragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,10 +35,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance()
         // Initialize Firebase Auth
-
+        Log.i("Utilizador antes", mAuth!!.currentUser?.displayName.toString())
         //Google Authentication------------------------------------------------------------------------------------------------------
         // Google sign in options client!!!!!!!!!!!
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -114,6 +120,8 @@ class MainActivity : AppCompatActivity() {
         val navController = Navigation.findNavController(this, R.id.nav_host_fragment)
         return NavigationUI.navigateUp(navController, mAppBarConfiguration!!) || super.onSupportNavigateUp()
     }
+
+
 
 
 }

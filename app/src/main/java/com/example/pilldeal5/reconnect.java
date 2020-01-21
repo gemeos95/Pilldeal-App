@@ -1,5 +1,6 @@
 package com.example.pilldeal5;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -18,6 +19,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,8 +34,22 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import java.io.IOException;
@@ -45,10 +61,13 @@ public class reconnect extends AppCompatActivity {
     ListView listView;
     TextView statusTextView;
     Button searchButton;
-    Button connect;
+    Button disconnect;
     TextView status;
     TextView received;
     int mSelectedItem;
+    int nummessages = 0;
+    String finalstring;
+
 
 
     //Bluethooth connection
@@ -62,8 +81,12 @@ public class reconnect extends AppCompatActivity {
     private static final int STATE_CONNECTED = 3;
     private static final int STATE_CONNECTION_FAILED = 4;
     private static final int STATE_MESSAGE_RECIEVED = 5;
-
+    private static final int STATE_FINISHED = 6;
+    private static final int STATE_NOTHING=7;
     private static final int BT_ENABLE_REQUEST = 10; // This is the code we use for BT Enable
+
+    FirebaseAuth mAuth = null;
+
 
     //To make the device a server
     private static final String App_Name = "PillDeal"; // This is the code we use for BT Enable
@@ -74,12 +97,47 @@ public class reconnect extends AppCompatActivity {
     ArrayAdapter arrayAdapter;
 
     SendReceive sendReceive;
+    ArrayList<String> Clicks = new ArrayList<>(); //they have to have an adress but not a name
 
 
     @Override
     protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reconnect);
+
+
+        // Initialize Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
+
+        Clicks.add("second Click");
+        Clicks.add("3º Click");
+        Clicks.add("4º Click");
+        Clicks.add("5ºClick");
+
+
+        final DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        database.child("users").child(mAuth.getCurrentUser().getUid()).child("Clicks").push().setValue("Funcionou1");
+
+
+
+// Attach a listener to read the data at our posts reference
+        database.child("users").child(mAuth.getCurrentUser().getUid()).child("Clicks").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String,String> map;
+
+                map = (HashMap<String, String>) dataSnapshot.getValue();
+                Log.i("data Added map", String.valueOf(map));
+                Log.i("data Added map", String.valueOf(map.size()));
+                Log.i("data Added map", String.valueOf(map.get(0)));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
+            }
+        });
+
 
 
 
@@ -90,9 +148,17 @@ public class reconnect extends AppCompatActivity {
         listView = findViewById(R.id.listView);
         statusTextView = findViewById(R.id.statusTextView);
         searchButton = findViewById(R.id.searchButton);
-        connect = findViewById(R.id.searchButton);
+        disconnect = findViewById(R.id.disconnect);
         status = findViewById(R.id.status);
         received = findViewById(R.id.received);
+
+        //State of button
+        disconnect.setEnabled(false);
+        Message message = Message.obtain();
+        message.what=STATE_NOTHING;
+        handler.sendMessage(message);
+
+        //State of handler
 
         //create an adapter, pass the layout and then pass the array created
         arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1,bluetoothDevices);
@@ -178,9 +244,13 @@ public class reconnect extends AppCompatActivity {
             if(action != null) {
                 Log.i("Action",action);
             }
-            Log.i("Entrou","It worked");
+
+            Message message = Message.obtain();
+            message.what=STATE_LISTENING;
 
             if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+
+                message.what=STATE_FINISHED;
                 statusTextView.setText("Finished");
                 searchButton.setEnabled(true);
             }else if(BluetoothDevice.ACTION_FOUND.equals(action)){
@@ -208,14 +278,24 @@ public class reconnect extends AppCompatActivity {
 
                 }
             }
+            handler.sendMessage(message);//Send Message to the Handler
+
         }
     };
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Don't forget to unregister the ACTION_FOUND receiver.
+        unregisterReceiver(broadcastReceiver);
+    }
+
     //WHEN SEARCH IS CLICKED WE START BY POPPING UP NEW bluetooth ACTIONS IN THE PHONE
     public void searchClicked(View view) {
+
         statusTextView.setText("Searching...");
         //Toast.makeText(reconnect.this, "onclick", Toast.LENGTH_SHORT).show();
-        Log.i("onclick", "asdsa");
 
         searchButton.setEnabled(false);
 
@@ -224,22 +304,37 @@ public class reconnect extends AppCompatActivity {
         adresses.clear();
 
         bluetoothAdapter.startDiscovery();
+
+
     }
 
-    //WHEN SEARCH IS CLICKED WE START BY POPPING UP NEW bluetooth ACTIONS IN THE PHONE
-    public void sendmessage(View view) {
-        statusTextView.setText("Sending...");
+    public void Disconnect(View view) {
+
+        /*
+        * statusTextView.setText("Sending...");
         //Toast.makeText(reconnect.this, "onclick", Toast.LENGTH_SHORT).show();
         Log.i("sending", "asdsa");
 
         String string= "12345"; //string to send
 
         sendReceive.write(string.getBytes());
+        * */
+        sendReceive.cancel();
+
     }
 
+// TO CALCULATE THE TIME AND SEND ONLY THE PROPER THINGS TO THE DATABASE
+@RequiresApi(api = Build.VERSION_CODES.O)
+public void givenTwoDateTimesInJava8_whenDifferentiatingInSeconds_thenWeGetTen() {
+    LocalDateTime now = LocalDateTime.now();
+    LocalDateTime tenSecondsLater = now.plusSeconds(10);
 
+    long diff = ChronoUnit.SECONDS.between(now, tenSecondsLater);
+    Log.i("TimeDifference",String.valueOf(diff));
+}
     //This handler will be recieving messages from the treadS above that says in wich stage the project is!
     Handler handler = new Handler(new Handler.Callback() {
+        @RequiresApi(api = Build.VERSION_CODES.O)
         @Override
         public boolean handleMessage (Message message) {
             Log.i("Handler",String.valueOf(message.arg1));
@@ -247,26 +342,53 @@ public class reconnect extends AppCompatActivity {
 
             switch (message.what)
             {
+                case STATE_NOTHING:
+                    status.setText("Not Connected");
+                    break;
                 case STATE_LISTENING:
                     status.setText("Listening");
+                    break;
+                case STATE_FINISHED:
+                    status.setText("Finished");
                     break;
                 case STATE_CONNECTING:
                     status.setText("Connecting");
                     break;
                 case STATE_CONNECTED:
-
                     status.setText("Connected");
+                    disconnect.setEnabled(true);
                     break;
                 case STATE_CONNECTION_FAILED:
                     status.setText("Conection Failed");
                     break;
                 case STATE_MESSAGE_RECIEVED:
-
                     byte[] readBuff= (byte[]) message.obj;
                     String tempMsg = new String(readBuff,0,message.arg1);
 
+                    /*
+                    * 1. See if there is any last click time by the user (if not)
+                    * mAuth.getCurrentUser().getUid()
+                    * 1.1 Detect what is the time now
+                    * 1.2 Save it in the database
+                    *
+                    * 2. If yes
+                    * 2.1 Take the last time and make the diference with now.
+                    * 2.2 if greater than x save it in the database, otherwise, show a toast
+                    * */
+
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime tenSecondsLater = now.plusSeconds(10);
+
+                    long diff = ChronoUnit.SECONDS.between(now, tenSecondsLater);
+                    Log.i("TimeDifference",String.valueOf(now));
+
+                    if(tempMsg != null){
+                        nummessages += 1;
+                    }
+                    Log.i("increment",Integer.toString(nummessages));
                     Log.i("Messageved",tempMsg);
-                    received.setText(tempMsg);
+                    finalstring = tempMsg;
+                    received.setText(finalstring);
                     break;
             }
             return true;
@@ -285,27 +407,34 @@ public class reconnect extends AppCompatActivity {
      * */
 
     private  class  ServerClass extends Thread{
-
-        private BluetoothServerSocket serverSocket;
+        // to listen for incoming connection requests and provide a connected BluetoothSocket after a request is accepted.
+        private final  BluetoothServerSocket serverSocket;
 
         public ServerClass(){
-            try{
-                serverSocket=bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(App_Name, My_UUID); // establish APP as server socket
+            // Use a temporary object that is later assigned to mmServerSocket
+            // because mmServerSocket is final.
+            BluetoothServerSocket tmp = null;
+
+            try{//Get a BluetoothServerSocket by calling listenUsingRfcommWithServiceRecord()
+                tmp =bluetoothAdapter.listenUsingRfcommWithServiceRecord(App_Name, My_UUID); // establish APP as server socket
                 Log.i("Entrou server client","oioi");
             }catch (IOException ex){
                 ex.printStackTrace();
             }
+            serverSocket = tmp;
         }
+
         public void run(){
             BluetoothSocket socket =null;
 
-            while(socket == null){
+            while(socket == null){ //Start listening for connection requests by calling accept()
                 try{
                     Message message = Message.obtain();
                     message.what=STATE_CONNECTING;
                     handler.sendMessage(message);//Send Message to the Handler, this way we know it :) (and can display it)
                     socket =serverSocket.accept(); //will accept the connection from the client -- then the method will return something to the socket making it be no longer null --> passing to the if() below
                 }catch (IOException e){
+                    Log.i("Catch","run - server side");
                     e.printStackTrace();
                     Message message = Message.obtain();
                     message.what=STATE_CONNECTION_FAILED;
@@ -315,13 +444,19 @@ public class reconnect extends AppCompatActivity {
                 if(socket!=null){ //have established the connection in the serverSocket.accept();
                     Message message = Message.obtain();
                     message.what=STATE_CONNECTED;
-                    handler.sendMessage(message);//Send Message to the Handler, this way we know it :) (and can display it)
+                    handler.sendMessage(message);//Send Message to the Handler
 
                     //Write code for send /receive
                     //initialize the send receive for the server device
                     sendReceive = new SendReceive(socket);
                     sendReceive.start();
 
+
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
 
                     break; //Beack the while loop
@@ -331,6 +466,16 @@ public class reconnect extends AppCompatActivity {
 
 
         }
+
+        // Closes the connect socket and causes the thread to finish.
+        public void cancel() {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                Log.e("", "Could not close the connect socket", e);
+            }
+        }
+
     }
 
     //Although the app is a server bluethooth device, it needs to create methods on wich the clients can connect into.
@@ -345,8 +490,8 @@ public class reconnect extends AppCompatActivity {
 
     private  class  ClientClass extends Thread{
 
-        private final BluetoothDevice device;
-        private final BluetoothSocket socket;
+        private final BluetoothDevice device;//BluetoothDevice object that represents the remote device.
+        private final BluetoothSocket socket;//You must then use the BluetoothDevice to acquire a BluetoothSocket and initiate the connection.
 
         public ClientClass(BluetoothDevice device1){
             // Use a temporary object that is later assigned to mmSocket
@@ -356,7 +501,8 @@ public class reconnect extends AppCompatActivity {
 
 
             try{
-                tmp =device.createInsecureRfcommSocketToServiceRecord(My_UUID); // establish APP as server socket
+                //The UUID passed here must match the UUID used by the server device
+                tmp =device.createRfcommSocketToServiceRecord(My_UUID); //Using the BluetoothDevice, get a BluetoothSocket
             }catch (IOException ex){
                 ex.printStackTrace();
             }
@@ -364,30 +510,64 @@ public class reconnect extends AppCompatActivity {
         }
         public void run(){
             // Cancel discovery because it otherwise slows down the connection.
-            BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+            bluetoothAdapter.cancelDiscovery();
 
-                try{
-                    socket.connect();
-                    Message message = Message.obtain();
-                    message.what=STATE_CONNECTED;
-                    handler.sendMessage(message);
 
-                    //initialize the send/receive for booth
-                    sendReceive=new SendReceive(socket);
-                    sendReceive.start();
+            //Because connect() is a blocking call, you should always perform this connection procedure in a thread that is separate from the main activity (UI) thread.
+            try{ //Initiate the connection by calling connect(). Note that this method is a blocking call.
+                socket.connect();
+                Message message = Message.obtain();
+                message.what=STATE_CONNECTED;
+                handler.sendMessage(message);
 
-                }catch (IOException e){
-                    e.printStackTrace();
-                    Message message = Message.obtain();
-                    message.what=STATE_CONNECTION_FAILED; //when you are not connecting to the decive you need to cancel de the device -- we do it in the handler
-                    handler.sendMessage(message);
+                //initialize the send/receive for client device
+                sendReceive=new SendReceive(socket);
+                sendReceive.start();
+
+            }catch (IOException e){
+                e.printStackTrace();
+                Message message = Message.obtain();
+                message.what=STATE_CONNECTION_FAILED; //when you are not connecting to the decive you need to cancel de the device -- we do it in the handler
+                handler.sendMessage(message);
+
+                try {
+                    socket.close();
+                } catch (IOException closeException) {
+                    Log.e("Server not connected", "Could not close the client socket", closeException);
                 }
+            }
+
+            /*
+            *
+            *
+            *
+            *
+            * */
+
+        }
+
+
+        // Closes the client socket and causes the thread to finish.
+        public void cancel() {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                Log.e("OnCancel", "Could not close the client socket", e);
+            }
         }
     }
 
     //TO SEND AND RECEIVE
     /*
      * https://developer.android.com/guide/topics/connectivity/bluetooth.html#ConnectingDevices
+     *
+     *
+     * 1.Get the InputStream and OutputStream that handle transmissions through the socket
+     * 2.Read and write data to the streams using read(byte[]) and write(byte[]).
+     *
+     * both the read(byte[]) and write(byte[]) methods are blocking calls.
+     *
+     * The read(byte[]) method blocks until there is something to read from the stream.
      * */
 
 private class SendReceive extends Thread{
@@ -395,6 +575,8 @@ private class SendReceive extends Thread{
     private final BluetoothSocket bluetoothSocket;
     private final InputStream inputStream;
     private final OutputStream outputStream;
+    private byte[] buffer; // mmBuffer store for the stream
+
 
     //constuctor
     public SendReceive(BluetoothSocket socket)
@@ -403,32 +585,46 @@ private class SendReceive extends Thread{
         InputStream tempIn=null;
         OutputStream tempOut=null;
 
-    try{
-        tempIn= bluetoothSocket.getInputStream(); //geting the streams of data - Entrar
-        tempOut=bluetoothSocket.getOutputStream();//geting the streams of data - Sair
-    }catch(IOException e){
-        e.printStackTrace();
-    }
+        try{
+            tempIn= bluetoothSocket.getInputStream(); //geting the streams of data - Entrar
+        }catch(IOException e){
+            Log.i("Inputstream","Error get when tring to get input stream");
+            e.printStackTrace();
+        }
 
-        inputStream= tempIn; //initializing final variables
-        outputStream=tempOut;
+        try{
+            tempOut=bluetoothSocket.getOutputStream();//geting the streams of data - Sair
+        }catch(IOException e){
+            Log.i("outputstream","Error get when tring to get output stream");
+            e.printStackTrace();
+        }
+
+
+        inputStream = tempIn; //initializing final variables
+        outputStream = tempOut;
 
     }
 
     public void run()
     {
-        byte [] buffer = new byte[1024]; //what contans the message
-        int bytes;//number of bytes
+        buffer = new byte[1024]; //what contans the message
+        int bytes;//number of bytes // bytes returned from read()
 
-        while(true){ //while loop because we are always ready to receive new messages
+        while(true){ // Keep listening to the InputStream until an exception occurs.
             try{
+                // Read from the InputStream.
                 bytes= inputStream.read(buffer);
+                // Send the obtained bytes to the handler.
                 handler.obtainMessage(STATE_MESSAGE_RECIEVED,bytes,-1,buffer).sendToTarget(); //Send this info to handler, just for input stream
             }catch(IOException e){
+                Log.d("Error", "Input stream was disconnected", e);
                 e.printStackTrace();
+                break;
             }
         }
     }
+
+    // Call this from the main activity to send data to the remote device.
     public void write(byte[] bytes){
 
         try{
@@ -438,7 +634,21 @@ private class SendReceive extends Thread{
         }
     }
 
+    // Call this method from the main activity to shut down the connection.
+    public void cancel() {
+        try {
+            bluetoothSocket.close();
+            Message message = Message.obtain();
+            message.what=STATE_NOTHING;
+            handler.sendMessage(message);
+            disconnect.setEnabled(false);
+        } catch (IOException e) {
+            Log.e("Disconect", "Could not close the connect socket", e);
+        }
+    }
+
 }
+
 }
 
 
