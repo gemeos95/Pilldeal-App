@@ -129,7 +129,7 @@ public class reconnect extends AppCompatActivity {
                 map = (HashMap<String, String>) dataSnapshot.getValue();
                 Log.i("data Added map", String.valueOf(map));
                 Log.i("data Added map", String.valueOf(map.size()));
-                Log.i("data Added map", String.valueOf(map.get(0)));
+                Log.i("data Added map", String.valueOf(map.get(map.size()-1)));
             }
 
             @Override
