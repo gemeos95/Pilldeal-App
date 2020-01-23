@@ -11,9 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.ToggleButton;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -63,11 +66,11 @@ public class SettingsFragment extends Fragment {
         //code from https://www.tutlane.com/tutorial/android/android-timepicker-with-examples
         tvw=(TextView)root.findViewById(R.id.textView1);
         tvw.setText("Selected Time: "+ "not yet selected");
-        //check user's alarm time
+        // get current user
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String useruid = user.getUid();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        // get current user
+        //check user's alarm time
         final DatabaseReference myRef = database.getReference().child("users").child(useruid).child("Alarm time");
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -109,6 +112,17 @@ public class SettingsFragment extends Fragment {
                             }
                         }, hour, minutes, true);
                 picker.show();
+            }
+        });
+
+        Switch switchButton = root.findViewById(R.id.switch1);
+        switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // The toggle is enabled
+                } else {
+                    // The toggle is disabled
+                }
             }
         });
 

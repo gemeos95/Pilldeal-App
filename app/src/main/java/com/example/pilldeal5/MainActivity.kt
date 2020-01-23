@@ -3,20 +3,24 @@ package com.example.pilldeal5
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import com.google.android.material.navigation.NavigationView
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 
 class MainActivity : AppCompatActivity() {
@@ -25,7 +29,6 @@ class MainActivity : AppCompatActivity() {
     private var mAuth: FirebaseAuth? = null
     private var mGoogleSignInClient : GoogleSignInClient? = null
     companion object var user = null;
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +68,8 @@ class MainActivity : AppCompatActivity() {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration!!)
         NavigationUI.setupWithNavController(navigationView, navController)
 
+        //Chamar alarm
+        AlarmSection()
 
 
     }
@@ -118,5 +123,30 @@ class MainActivity : AppCompatActivity() {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration!!) || super.onSupportNavigateUp()
     }
 
+    private fun CallAlarmService(intentCallService:Intent){
+        stopService(intentCallService);
+        startService(intentCallService)
+
+    }
+
+    private fun AlarmSection(){
+        // get current user
+        val user = FirebaseAuth.getInstance().currentUser
+        val useruid = user!!.uid
+        val database = FirebaseDatabase.getInstance()
+        var myRef = database.getReference().child("users").child(useruid).child("Alarm time");
+        myRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                //basicamente, se há uma alteração do time, dá-lhe alarme
+                val intentCallService = Intent(this@MainActivity, MyService::class.java)
+                CallAlarmService(intentCallService)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Failed to read value
+                Log.w("TAG", "loadPost:onCancelled", databaseError.toException())
+            }
+        });
+    }
 
 }
