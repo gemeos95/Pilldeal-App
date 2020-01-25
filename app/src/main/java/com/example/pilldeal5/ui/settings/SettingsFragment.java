@@ -75,56 +75,68 @@ public class SettingsFragment extends Fragment {
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                time = dataSnapshot.getValue(String.class);
-                Log.i("TIME123", time);
-                tvw.setText("Selected Time: "+ time);
+                try{
+                    time = dataSnapshot.getValue(String.class);
+                    Log.i("TIME123", time);
+                    tvw.setText("Selected Time: "+ time);
+                }catch (Exception e){
+                    Log.i("No alarm","Update time of the alarm");
+                }
+
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {}
             // Failed to read value
         });
-        tvw.setText("Selected Time: "+ time);
-        btnGet=(Button)root.findViewById(R.id.button1);
-        btnGet.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Calendar cldr = Calendar.getInstance();
-                int hour = cldr.get(Calendar.HOUR_OF_DAY);
-                int minutes = cldr.get(Calendar.MINUTE);
-                // time picker dialog
-                picker = new TimePickerDialog(getActivity(),
-                        new TimePickerDialog.OnTimeSetListener() {
-                            @Override
-                            public void onTimeSet(TimePicker tp, int sHour, int sMinute) {
-                                String time = sHour + ":" + sMinute;
-                                tvw.setText("Selected Time: "+ time);
-                                // get user uid from shared prefs
+
+        try{
+            tvw.setText("Selected Time: "+ time);
+            btnGet=(Button)root.findViewById(R.id.button1);
+            btnGet.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final Calendar cldr = Calendar.getInstance();
+                    int hour = cldr.get(Calendar.HOUR_OF_DAY);
+                    int minutes = cldr.get(Calendar.MINUTE);
+                    // time picker dialog
+                    picker = new TimePickerDialog(getActivity(),
+                            new TimePickerDialog.OnTimeSetListener() {
+                                @Override
+                                public void onTimeSet(TimePicker tp, int sHour, int sMinute) {
+                                    String time = sHour + ":" + sMinute;
+                                    tvw.setText("Selected Time: "+ time);
+                                    // get user uid from shared prefs
                                 /*Context context = getActivity();
                                 SharedPreferences sharedPref = context.getSharedPreferences(
                                         getString(R.string.preference_file_alarm_time), Context.MODE_PRIVATE);
                                 String useruid = sharedPref.getString(getString(R.string.preference_file_alarm_time), "error");*/
 
-                                //update firebase
-                                //if(!useruid.equals("error")){ //fail safe caso dê erro a ler useruid
-                                //}
-                                //update Firebase
-                                myRef.setValue(time);
-                            }
-                        }, hour, minutes, true);
-                picker.show();
-            }
-        });
-
-        Switch switchButton = root.findViewById(R.id.switch1);
-        switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    // The toggle is enabled
-                } else {
-                    // The toggle is disabled
+                                    //update firebase
+                                    //if(!useruid.equals("error")){ //fail safe caso dê erro a ler useruid
+                                    //}
+                                    //update Firebase
+                                    myRef.setValue(time);
+                                }
+                            }, hour, minutes, true);
+                    picker.show();
                 }
-            }
-        });
+            });
+
+            Switch switchButton = root.findViewById(R.id.switch1);
+            switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        // The toggle is enabled
+                    } else {
+                        // The toggle is disabled
+                    }
+                }
+            });
+        }catch (Exception e){
+            Log.i("No alarm","Update time of the alarm");
+        }
+
+
 
 
 

@@ -37,24 +37,32 @@ public class AlarmJavaClass {
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                time[0] = dataSnapshot.getValue(String.class);
-                spliter[0] = time[0].split(":");
-                alarmHour[0] = Integer.parseInt(spliter[0][0]);
-                alarmMinute[0] = Integer.parseInt(spliter[0][1]);
-                ringtone[0] = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
-                t.scheduleAtFixedRate(new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (Calendar.getInstance().getTime().getHours() == alarmHour[0] &&
-                                Calendar.getInstance().getTime().getMinutes() == alarmMinute[0]) {
-                            Log.i("ALARM123", "play123");
-                            ringtone[0].play();
-                        } else {
-                            ringtone[0].stop();
-                            //aqui talvez dar uma time frame para tocar e dar opção de desligar?
+                try{
+                    time[0] = dataSnapshot.getValue(String.class);
+                    spliter[0] = time[0].split(":");
+                    alarmHour[0] = Integer.parseInt(spliter[0][0]);
+                    alarmMinute[0] = Integer.parseInt(spliter[0][1]);
+                    ringtone[0] = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+                    t.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+                            if (Calendar.getInstance().getTime().getHours() == alarmHour[0] &&
+                                    Calendar.getInstance().getTime().getMinutes() == alarmMinute[0]) {
+                                Log.i("ALARM123", "play123");
+                                ringtone[0].play();
+                            } else {
+                                ringtone[0].stop();
+                                //aqui talvez dar uma time frame para tocar e dar opção de desligar?
+                            }
                         }
-                    }
-                }, 0, 2000);
+                    }, 0, 2000);
+
+                }catch (Exception e){
+                    Log.i("No alarm","Update time of the alarm");
+                }
+
+
+
             }
 
             @Override
