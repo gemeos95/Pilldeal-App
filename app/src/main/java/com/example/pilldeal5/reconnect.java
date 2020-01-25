@@ -34,28 +34,41 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.text.SimpleDateFormat;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static com.google.firebase.database.ServerValue.*;
 
 public class reconnect extends AppCompatActivity {
     ListView listView;
@@ -98,8 +111,11 @@ public class reconnect extends AppCompatActivity {
 
     SendReceive sendReceive;
     ArrayList<String> Clicks = new ArrayList<>(); //they have to have an adress but not a name
-
-
+    ArrayList<String> Novos_click;
+    long lastClickTime;
+    DatabaseReference database;
+    String AdressToSave;
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,35 +125,30 @@ public class reconnect extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        Clicks.add("second Click");
-        Clicks.add("3º Click");
-        Clicks.add("4º Click");
-        Clicks.add("5ºClick");
 
+        database = FirebaseDatabase.getInstance().getReference();
 
-        final DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        database.child("users").child(mAuth.getCurrentUser().getUid()).child("Clicks").push().setValue("Funcionou1");
-
-
-
-// Attach a listener to read the data at our posts reference
-        database.child("users").child(mAuth.getCurrentUser().getUid()).child("Clicks").addValueEventListener(new ValueEventListener() {
+/*
+*
+*
+*
+* //
+* Listen and take the last time of the click (constantly listen)
+        database.child("users").child(mAuth.getCurrentUser().getUid()).child("Last_click").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                HashMap<String,String> map;
+           lastClickTime = (long) dataSnapshot.getChildren().iterator().next().getValue();
+           Log.i("lastClickTime", String.valueOf(lastClickTime));
+           }
 
-                map = (HashMap<String, String>) dataSnapshot.getValue();
-                Log.i("data Added map", String.valueOf(map));
-                Log.i("data Added map", String.valueOf(map.size()));
-                Log.i("data Added map", String.valueOf(map.get(map.size()-1)));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+           @Override
+           public void onCancelled(DatabaseError databaseError) {
                 System.out.println("The read failed: " + databaseError.getCode());
-            }
+           }
         });
-
+        *
+*
+* */
 
 
 
@@ -171,8 +182,7 @@ public class reconnect extends AppCompatActivity {
         //Search paired Devices----------------------------
 
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-        String[] strings = new String[pairedDevices.size()];
-        int index=0;
+
 
         if (pairedDevices.size() > 0) {
             for (BluetoothDevice device : pairedDevices) {
@@ -224,6 +234,7 @@ public class reconnect extends AppCompatActivity {
             public void onItemClick (AdapterView<?> adapterView, View view, int i, long l) {
                 //Initialize the client ---- IMPORTANT TO UNDERSTAND
                 mSelectedItem = i;
+                AdressToSave = btArray.get(i).toString();
 
                 ClientClass clientClass=new ClientClass(btArray.get(i));
                 clientClass.start();
@@ -375,6 +386,31 @@ public void givenTwoDateTimesInJava8_whenDifferentiatingInSeconds_thenWeGetTen()
                     * 2.1 Take the last time and make the diference with now.
                     * 2.2 if greater than x save it in the database, otherwise, show a toast
                     * */
+
+                    //Getting the current date
+                    Date date = new Date();
+
+                    //This method returns the time in millis
+                    long timeMilli = date.getTime();
+                    System.out.println("Time in milliseconds using Date class: " + timeMilli);
+
+                    // Creating date format
+                    DateFormat simple = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                    // Creating date from milliseconds
+                    // using Date() constructor
+                    Date result = new Date(timeMilli);
+                    // Formatting Date according to the
+                    // given format
+                    String date_formated = simple.format(result);
+                    System.out.println("time in date:" + date_formated);
+
+                    Map map = new HashMap();
+                    map.put(date_formated, timeMilli);
+
+                    database.child("users").child(mAuth.getCurrentUser().getUid()).child("Last_click").setValue(map);
+                    database.child("users").child(mAuth.getCurrentUser().getUid()).child("Clicks").child(date_formated).setValue(timeMilli);
+                    database.child("users").child(mAuth.getCurrentUser().getUid()).child("Clip").setValue(AdressToSave);
+
 
                     LocalDateTime now = LocalDateTime.now();
                     LocalDateTime tenSecondsLater = now.plusSeconds(10);
