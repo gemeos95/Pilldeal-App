@@ -1,6 +1,7 @@
 package com.example.pilldeal5
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -138,15 +139,30 @@ class MainActivity : AppCompatActivity() {
         myRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 //basicamente, se há uma alteração do time, dá-lhe alarme
-                val intentCallService = Intent(this@MainActivity, MyService::class.java)
-                CallAlarmService(intentCallService)
+                //val intentCallService = Intent(this@MainActivity, AlarmService::class.java)
+                //CallAlarmService(intentCallService)
+                actionOnService(Actions.START)
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 // Failed to read value
                 Log.w("TAG", "loadPost:onCancelled", databaseError.toException())
             }
-        });
+        })
+    }
+
+    private fun actionOnService(action: Actions) {
+        if (getServiceState(this) == ServiceState.STOPPED && action == Actions.STOP) return
+        Intent(this, AlarmForegroundService::class.java).also {
+            it.action = action.name
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                log("Starting the service in >=26 Mode")
+                startForegroundService(it)
+                return
+            }
+            log("Starting the service in < 26 Mode")
+            startService(it)
+        }
     }
 
 }
