@@ -1,27 +1,26 @@
 package com.example.pilldeal5
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
-import com.google.android.material.navigation.NavigationView
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import android.view.Menu
-import android.view.MenuItem
-import androidx.annotation.RequiresApi
-import com.example.pilldeal5.ui.settings.SettingsFragment
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,18 +28,16 @@ class MainActivity : AppCompatActivity() {
     private var mAppBarConfiguration: AppBarConfiguration? = null
     private var mAuth: FirebaseAuth? = null
     private var mGoogleSignInClient : GoogleSignInClient? = null
-
+    companion object var user = null;
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance()
         // Initialize Firebase Auth
-        Log.i("Utilizador antes", mAuth!!.currentUser?.displayName.toString())
+
         //Google Authentication------------------------------------------------------------------------------------------------------
         // Google sign in options client!!!!!!!!!!!
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -50,11 +47,14 @@ class MainActivity : AppCompatActivity() {
 
         mGoogleSignInClient = GoogleSignIn.getClient(this,gso)
 
+        //user = intent.getStringExtra("user") as Nothing? //get user uid from login activity
+
+
         setContentView(R.layout.activity_main)
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-
+        //creating drawer layout
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         // Passing each menu ID as a set of Ids because each
@@ -68,6 +68,8 @@ class MainActivity : AppCompatActivity() {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration!!)
         NavigationUI.setupWithNavController(navigationView, navController)
 
+        //Chamar alarm
+        AlarmSection()
 
 
     }
@@ -90,7 +92,7 @@ class MainActivity : AppCompatActivity() {
 
             //Signout the user
             //move to login
-            val intent = Intent (this, Login::class.java)
+            val intent = Intent (this, LoginActivity::class.java)
             startActivity(intent)
         }else if (item?.itemId==R.id.action_reconect){
             //reconect the user
@@ -121,7 +123,30 @@ class MainActivity : AppCompatActivity() {
         return NavigationUI.navigateUp(navController, mAppBarConfiguration!!) || super.onSupportNavigateUp()
     }
 
+    private fun CallAlarmService(intentCallService:Intent){
+        stopService(intentCallService);
+        startService(intentCallService)
 
+    }
 
+    private fun AlarmSection(){
+        // get current user
+        val user = FirebaseAuth.getInstance().currentUser
+        val useruid = user!!.uid
+        val database = FirebaseDatabase.getInstance()
+        var myRef = database.getReference().child("users").child(useruid).child("Alarm time");
+        myRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                //basicamente, se há uma alteração do time, dá-lhe alarme
+                val intentCallService = Intent(this@MainActivity, MyService::class.java)
+                CallAlarmService(intentCallService)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Failed to read value
+                Log.w("TAG", "loadPost:onCancelled", databaseError.toException())
+            }
+        });
+    }
 
 }

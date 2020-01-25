@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "19625147287-5dgmdgaf228g184bt5n4i3ih9r5utff8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pilldeal5",
+            "certificate_hash": "71237c85b48620eea343d5812c8850dc4de4289b"
+          }
+        },
+        {
           "client_id": "19625147287-hgf7lsj4gml09tlfktam029o5lub6jrv.apps.googleusercontent.com",
           "client_type": 3
         }

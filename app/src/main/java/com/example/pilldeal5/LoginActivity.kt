@@ -1,42 +1,26 @@
 package com.example.pilldeal5
 
-import androidx.appcompat.app.AppCompatActivity
-
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import androidx.core.content.ContextCompat.startActivity
-
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.gms.tasks.Task
-import com.google.firebase.database.FirebaseDatabase
-import kotlinx.android.synthetic.main.activity_login.*
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.widget.*
+import android.widget.ProgressBar
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
-import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.auth.*
-import kotlin.math.log
 import com.google.firebase.auth.FirebaseAuth
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import com.google.firebase.auth.FirebaseUser
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.FirebaseDatabase
 
 
-
-
-
-
-class Login : AppCompatActivity() {
+class LoginActivity : AppCompatActivity() {
 
     private var mAuth: FirebaseAuth? = null
     private var mGoogleSignInClient : GoogleSignInClient? = null
@@ -59,6 +43,9 @@ class Login : AppCompatActivity() {
 
         signInButton = findViewById(R.id.sign_in_button)
         progressBar = findViewById(R.id.progress_circular)
+
+        // allow offline behaviour
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance()
@@ -87,13 +74,23 @@ class Login : AppCompatActivity() {
         })
 
 
+        if (mAuth!!.currentUser != null) {
+            val user = mAuth!!.currentUser
+            updateUI(user)
+        }
 
+    }
+
+    fun  googleSignin(){
 
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.i("onActivityResult","Entrou")
+        Log.i("onActivityResult",requestCode.toString())
+        Log.i("onActivityResult", resultCode.toString())
+        Log.i("onActivityResult",data.toString())
 
 
 
@@ -125,6 +122,12 @@ class Login : AppCompatActivity() {
 
                         // Sign in success, update UI with the signed-in user's information
                         val user = mAuth?.currentUser
+                        val sharedPref = getSharedPreferences(
+                                getString(R.string.preference_file_alarm_time), Context.MODE_PRIVATE)  ?: return@addOnCompleteListener
+                        with (sharedPref.edit()) {
+                            putString(getString(R.string.preference_file_alarm_time), user.toString())
+                            commit()
+                        }
                         //Log.i("USER", mAuth?.currentUser?.getIdToken().toString())
                         updateUI(user)
                     } else {
@@ -153,7 +156,7 @@ class Login : AppCompatActivity() {
             database.child("users").child(user.uid).child("Nome").setValue(email)
             database.child("users").child(user.uid).child("Photo").setValue(photo)
 
-            moveToMainActivity()
+            moveToMainActivity(user.uid)
 
         }else{
             Log.i("NoUser","no user data")
@@ -162,8 +165,9 @@ class Login : AppCompatActivity() {
     }
 
 
-    private fun moveToMainActivity() {
-        val intent = Intent(this@Login, MainActivity::class.java)
+    private fun moveToMainActivity(user:String) {
+        val intent = Intent(this@LoginActivity, MainActivity::class.java)
+        intent.putExtra("user", user) //pass user uid to main activity
         startActivity(intent)
     }
 
