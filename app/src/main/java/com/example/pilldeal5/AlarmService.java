@@ -1,6 +1,7 @@
 package com.example.pilldeal5;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -23,13 +24,14 @@ import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MyService extends Service {
+public class AlarmService extends Service {
     private String time;
     private String[] spliter;
     private Integer alarmHour;
     private Integer alarmMinute;
     private Ringtone ringtone;
     private Timer t = new Timer();
+
 
     @Nullable
     @Override
